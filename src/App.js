@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
 // add these near other imports
+const SHEETDB_URL = "https://sheetdb.io/api/v1/y4j0ab8cgggc0"; 
+
 
 
 
@@ -201,7 +203,9 @@ export default function App() {
     // eslint-disable-next-line
   }, []);
 
-
+  useEffect(() => {
+  loadLeaderboard();
+}, []);
 
   // Background oscillator loop
   const bgLoopRef = useRef(null);
@@ -335,7 +339,7 @@ export default function App() {
   }
 
  
-  function saveScore(auto = false) {
+  /* function saveScore(auto = false) {
   if (!playerName) {
     if (!auto) alert("Enter your display name before saving your score.");
     return;
@@ -370,8 +374,91 @@ export default function App() {
   if (!auto) {
     alert("Score saved! 🎉");
   }
-} 
+}  */
+/* async function saveScore(auto = false) {
+  if (!playerName) {
+    if (!auto) alert("Enter your display name before saving your score.");
+    return;
+  }
 
+  // Check only if not auto-save
+  if (!auto) {
+    const exists = leaderboard.find(e => e.Name?.toLowerCase() === playerName.toLowerCase());
+    if (exists) {
+      alert("You have already played! Only your first score is kept.");
+      return;
+    }
+  }
+
+  const payload = {
+    data: {
+      Name: playerName,
+      Score: score,
+      Timestamp: new Date().toISOString()
+    }
+  };
+
+  try {
+    await fetch(SHEETDB_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!auto) alert("Score saved to online leaderboard! 🎉");
+
+    // Reload leaderboard after saving
+    loadLeaderboard();
+
+  } catch (err) {
+    console.error("SheetDB save error:", err);
+    alert("Failed to save score!");
+  }
+} */
+
+async function saveScore(auto = false) {
+  if (!playerName) {
+    if (!auto) alert("Enter your display name before saving your score.");
+    return;
+  }
+
+  // Prevent duplicate names (do this only on manual save)
+  if (!auto) {
+    const exists = leaderboard.find(e => e.Name.toLowerCase() === playerName.toLowerCase());
+    if (exists) {
+      alert("You already played. Only first score is saved.");
+      return;
+    }
+  }
+
+  // Correct SheetDB format
+  const payload = {
+    data: [
+      {
+        Name: playerName,
+        Score: score,
+        Timestamp: new Date().toLocaleString()
+      }
+    ]
+  };
+
+  try {
+    await fetch(SHEETDB_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!auto) alert("Score saved successfully!");
+
+    // Refresh leaderboard after saving
+    loadLeaderboard();
+
+  } catch (err) {
+    console.error("SheetDB save error:", err);
+    alert("Error saving score!");
+  }
+}
 
 
   // create inline funny SVG background and logo
@@ -388,6 +475,45 @@ export default function App() {
   // small UI render helpers
   //const currentQuestion = QUESTIONS[level][qIdx];
   const currentQuestion = shuffledQuestionsRef.current[level][qIdx];
+  /* async function loadLeaderboard() {
+  try {
+    const res = await fetch(SHEETDB_URL);
+    let data = await res.json();
+
+    // Fix types
+    data = data.map(e => ({
+      ...e,
+      Score: Number(e.Score || 0)
+    }));
+
+    // Sort by score desc
+    data.sort((a, b) => b.Score - a.Score);
+
+    setLeaderboard(data);
+  } catch (err) {
+    console.error("Load leaderboard error:", err);
+  }
+} */
+
+async function loadLeaderboard() {
+  try {
+    const res = await fetch(SHEETDB_URL);
+    let data = await res.json();
+
+    // Convert Score to number
+    data = data.map(e => ({
+      ...e,
+      Score: Number(e.Score || 0)
+    }));
+
+    // Sort highest → lowest
+    data.sort((a, b) => b.Score - a.Score);
+
+    setLeaderboard(data);
+  } catch (err) {
+    console.error("Load leaderboard error:", err);
+  }
+}
 
 
   return (
@@ -442,10 +568,10 @@ export default function App() {
         {/* shiva */}
         <div className="save-block">
               <input placeholder="Your display name" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
-              <div className="save-row">
+              {/* <div className="save-row">
                 <button className="btn" onClick={saveScore}>Save Score</button>
                 <button className="btn" onClick={() => { setLeaderboard([]); localStorage.removeItem("gis_leaderboard"); }}>Clear Scores</button>
-              </div>
+              </div> */}
             </div>
         
       </header>
@@ -635,8 +761,8 @@ export default function App() {
                       return (
                         <tr key={idx}>
                           <td>{idx + 1}</td>
-                          <td>{e.name}</td>
-                          <td>{e.score}</td>
+                          <td>{e.Name}</td>
+                          <td>{e.Score}</td>
                           <td>{medal}</td>
                         </tr>
                       );
