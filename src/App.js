@@ -181,6 +181,8 @@ export default function App() {
   const [showLeaderboardButton, setShowLeaderboardButton] = useState(false);
   const [showFinalPopup, setShowFinalPopup] = useState(false);
   const shuffledQuestionsRef = useRef(null);
+  const [quizFinished, setQuizFinished] = useState(false);
+
 
   if (!shuffledQuestionsRef.current) {
     shuffledQuestionsRef.current = {
@@ -322,17 +324,15 @@ export default function App() {
         } else {
            // === finished whole quiz ===
           playGameFinish();
-
           // Auto-save score once quiz completes
           saveScore(true);
-
           // show leaderboard panel
           setShowLeaderboard(false);
-
           // enable the “View Leaderboard” button
           setShowLeaderboardButton(true);
-
           setShowFinalPopup(true);
+          setQuizFinished(true);
+
         }
       }
     }, 900);
@@ -421,42 +421,56 @@ async function saveScore(auto = false) {
     if (!auto) alert("Enter your display name before saving your score.");
     return;
   }
+  try {
 
-  // Prevent duplicate names (do this only on manual save)
-  if (!auto) {
-    const exists = leaderboard.find(e => e.Name.toLowerCase() === playerName.toLowerCase());
-    if (exists) {
-      alert("You already played. Only first score is saved.");
+    // 🔍 1. Check existing entries from SheetDB
+    const res = await fetch(SHEETDB_URL);
+    const existing = await res.json();
+
+    const nameExists = existing.some(
+      e => e.Name.toLowerCase() === playerName.toLowerCase()
+    );
+
+    // ❌ If duplicate → do NOT save again
+    if (nameExists) {
+      if (!auto) alert("This name already exists! You already played. Only first score is saved.");
       return;
     }
-  }
 
-  // Correct SheetDB format
-  const payload = {
-    data: [
-      {
-        Name: playerName,
-        Score: score,
-        Timestamp: new Date().toLocaleString()
+    // Prevent duplicate names (do this only on manual save)
+    if (!auto) {
+      const exists = leaderboard.find(e => e.Name.toLowerCase() === playerName.toLowerCase());
+      if (exists) {
+        alert("You already played. Only first score is saved.");
+        return;
       }
-    ]
-  };
+    }
 
-  try {
-    await fetch(SHEETDB_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    // Correct SheetDB format
+    const payload = {
+      data: [
+        {
+          Name: playerName,
+          Score: score,
+          Timestamp: new Date().toLocaleString()
+        }
+      ]
+    };
 
-    if (!auto) alert("Score saved successfully!");
+      await fetch(SHEETDB_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    // Refresh leaderboard after saving
-    loadLeaderboard();
+      if (!auto) alert("Score saved successfully!");
+
+      // Refresh leaderboard after saving
+      loadLeaderboard();
 
   } catch (err) {
     console.error("SheetDB save error:", err);
-    alert("Error saving score!");
+    alert("Error saving leaderboard score!");
   }
 }
 
@@ -577,7 +591,7 @@ async function loadLeaderboard() {
       </header>
 
       <main className="content">
-        <aside className="left-panel">
+        {/* <aside className="left-panel">
           <div className="card">
             <div className="level-header">
               <div>
@@ -630,16 +644,37 @@ async function loadLeaderboard() {
                   })}
                 </div>
 
-                <div className="hint">Hint: { /* simple hint placeholder */ } Think about GIS basics.</div>
+                <div className="hint">Hint: Think about GIS basics.</div>
               </div>
             </div>
 
-            {/* <div className="card-actions">
+            ///////////// <div className="card-actions">
               <button className="btn" onClick={() => {  if (!answered) { setAnswered(false); setSelected(null); setFeedback(null); setQIdx(qIdx < 5 ? qIdx + 1 : qIdx); } }}>Skip</button>
               <button className="btn" onClick={() => {  if (!answered) { setAnswered(true); setFeedback("wrong"); setSelected(null); } }}>Reveal (no points)</button>
-            </div> */}
+            </div> /////////////
           </div>
-        </aside>
+        </aside> */}
+        <aside className="left-panel">
+        {!quizFinished ? (
+          <div className="card">
+            {/* existing question UI */}
+            ...
+          </div>
+        ) : (
+          <div className="card end-card">
+            <h2 style={{ textAlign: "center" }}>🎉 Happy GIS Day! 🎉</h2>
+            <img 
+              src="https://i.imgur.com/zYp6e0f.png" 
+              alt="Happy GIS Day" 
+              style={{ width: "100%", borderRadius: "12px", marginTop: "10px" }}
+            />
+            <p style={{ textAlign: "center", marginTop: "12px" }}>
+              Thanks for playing and celebrating GIS Day with us! 🌍
+            </p>
+          </div>
+        )}
+      </aside>
+
 
         <aside className="right-panel">
           <div className="card">
