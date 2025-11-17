@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/office-game/static/css/main.b0a774f8.css",
-    "main.js": "/office-game/static/js/main.3128d54d.js",
+    "main.js": "/office-game/static/js/main.55623780.js",
     "static/js/453.da77d47f.chunk.js": "/office-game/static/js/453.da77d47f.chunk.js",
     "index.html": "/office-game/index.html",
     "main.b0a774f8.css.map": "/office-game/static/css/main.b0a774f8.css.map",
-    "main.3128d54d.js.map": "/office-game/static/js/main.3128d54d.js.map",
+    "main.55623780.js.map": "/office-game/static/js/main.55623780.js.map",
     "453.da77d47f.chunk.js.map": "/office-game/static/js/453.da77d47f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b0a774f8.css",
-    "static/js/main.3128d54d.js"
+    "static/js/main.55623780.js"
   ]
 }
