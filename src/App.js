@@ -654,11 +654,64 @@ async function loadLeaderboard() {
             </div> /////////////
           </div>
         </aside> */}
+
         <aside className="left-panel">
         {!quizFinished ? (
           <div className="card">
-            {/* existing question UI */}
-            ...
+            <div className="level-header">
+              <div>
+                <div className="level-title">Level {level} — {LEVEL_NAMES[level - 1]}</div>
+                 <div className="level-caption">
+                  {(() => {
+                    switch (level) {
+                      case 1:
+                        return "Think of a Topology Ninja as someone who ensures your map geometry is perfectly connected and clean!";
+                      case 2:
+                        return "A Raster Ranger explores the pixel wilderness — decoding information hidden in every grid cell.";
+                      case 3:
+                        return "Think of a Feature Class Fighter as a vector warrior who organizes, defends, and manages every point, line, and polygon on the map battlefield!";
+                      case 4:
+                        return "Think of a Geoprocessing Gladiator as a GIS warrior who wields analytical tools like swords — slicing, merging, and transforming data to reveal spatial truths!";
+                      case 5:
+                        return "Think of a Spatial Sensei as the ultimate GIS master — calm, wise, and able to see the invisible patterns that shape our world!";
+                      default:
+                        return "";
+                    }
+                  })()}
+                </div>
+
+                <div className="qcount">Question {qIdx + 1} of 6</div>
+              </div>
+              <div className="score-circle" ref={animatedScoreRef}>{score}</div>
+            </div>
+
+            <div className="question-area">
+              <div className={`question-card ${feedback === "correct" ? "correct" : ""} ${feedback === "wrong" ? "wrong" : ""}`}>
+                <div className="question-text">{currentQuestion.q}</div>
+
+                <div className="options">
+                  {currentQuestion.opts.map((opt, i) => {
+                    const isSelected = selected === i;
+                    const isCorrect = i === currentQuestion.a;
+                    return (
+                      <button
+                        key={i}
+                        className={`option ${isSelected ? "selected" : ""} ${answered && isCorrect ? "reveal-correct" : ""}`}
+                        onClick={() => handleOptionClick(i)}
+                        disabled={answered}
+                      >
+                        <span className="opt-text">{opt}</span>
+                        <span className="opt-mark">
+                          {answered && isSelected ? (feedback === "correct" ? "✓" : "✕") : ""}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="hint">Hint: Think about GIS basics.</div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="card end-card">
