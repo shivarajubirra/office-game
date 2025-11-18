@@ -485,6 +485,13 @@ async function saveScore(auto = false) {
       </g>
     </svg>
   );
+  /* const LogoSVG = (
+    <img 
+      src="/images/logo.png"
+      alt="GIS Logo"
+      style={{ width: "48px", height: "48px" }}
+    />
+  ); */
 
   // small UI render helpers
   //const currentQuestion = QUESTIONS[level][qIdx];
@@ -717,7 +724,7 @@ async function loadLeaderboard() {
           <div className="card end-card">
             <h2 style={{ textAlign: "center" }}>🎉 Happy GIS Day! 🎉</h2>
             <img 
-              src="https://i.imgur.com/zYp6e0f.png" 
+              src="/images/HAPPYGIS.png" 
               alt="Happy GIS Day" 
               style={{ width: "100%", borderRadius: "12px", marginTop: "10px" }}
             />
