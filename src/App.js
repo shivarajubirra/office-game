@@ -415,6 +415,38 @@ export default function App() {
     alert("Failed to save score!");
   }
 } */
+async function validatePlayerBeforeStart() {
+  if (!introName.trim()) {
+    alert("Please enter your name to begin!");
+    return;
+  }
+
+  try {
+    const res = await fetch(SHEETDB_URL);
+    const rows = await res.json();
+
+    const today = new Date().toLocaleDateString();
+
+    // Check if same name played *today*
+    const playedToday = rows.some(row =>
+      row.Name.toLowerCase() === introName.toLowerCase() &&
+      new Date(row.Timestamp).toLocaleDateString() === today
+    );
+
+    if (playedToday) {
+      alert("You already played today. Come back tomorrow!");
+      return; // ❌ do NOT allow quiz to start
+    }
+
+    // ✔ Allowed → start quiz
+    setPlayerName(introName);
+    setShowStartPopup(false);
+
+  } catch (err) {
+    console.error("Start validation error:", err);
+    alert("Unable to validate your name. Try again.");
+  }
+}
 
 async function saveScore(auto = false) {
   if (!playerName) {
@@ -558,8 +590,11 @@ async function loadLeaderboard() {
             value={introName}
             onChange={(e) => setIntroName(e.target.value)}
           />
+          <button className="start-btn" onClick={validatePlayerBeforeStart}>
+            Start Quiz 🚀
+          </button>
 
-          <button
+          {/* <button
             className="start-btn"
             onClick={() => {
               if (!introName.trim()) {
@@ -572,7 +607,7 @@ async function loadLeaderboard() {
             }}
           >
             Start Quiz 🚀
-          </button>
+          </button> */}
         </div>
       </div>
     )}
