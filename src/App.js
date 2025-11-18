@@ -415,7 +415,7 @@ export default function App() {
     alert("Failed to save score!");
   }
 } */
-async function validatePlayerBeforeStart() {
+/* async function validatePlayerBeforeStart() {
   if (!introName.trim()) {
     alert("Please enter your name to begin!");
     return;
@@ -436,6 +436,35 @@ async function validatePlayerBeforeStart() {
     if (playedToday) {
       alert("You already played today. Come back tomorrow!");
       return; // ❌ do NOT allow quiz to start
+    }
+
+    // ✔ Allowed → start quiz
+    setPlayerName(introName);
+    setShowStartPopup(false);
+
+  } catch (err) {
+    console.error("Start validation error:", err);
+    alert("Unable to validate your name. Try again.");
+  }
+} */
+async function validatePlayerBeforeStart() {
+  if (!introName.trim()) {
+    alert("Please enter your name to begin!");
+    return;
+  }
+
+  try {
+    const res = await fetch(SHEETDB_URL);
+    const rows = await res.json();
+
+    // ❌ Block if same name already exists in sheet
+    const nameExists = rows.some(
+      row => row.Name.toLowerCase() === introName.toLowerCase()
+    );
+
+    if (nameExists) {
+      alert("This name has already played. You cannot play twice!");
+      return;
     }
 
     // ✔ Allowed → start quiz
@@ -759,7 +788,7 @@ async function loadLeaderboard() {
           <div className="card end-card">
             <h2 style={{ textAlign: "center" }}>🎉 Happy GIS Day! 🎉</h2>
             <img 
-              src="/images/HAPPYGIS.png" 
+              src="/imagess/Gis_Celeb.png" 
               alt="Happy GIS Day" 
               style={{ width: "100%", borderRadius: "12px", marginTop: "10px" }}
             />
